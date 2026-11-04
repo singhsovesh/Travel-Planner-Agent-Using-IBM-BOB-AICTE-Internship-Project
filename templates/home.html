@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_name }} — AI-Powered Travel Planning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #0f62fe; --blue-dark: #0043ce; --blue-hover: #0353e9;
+      --teal: #009d9a; --purple: #8a3ffc; --green: #24a148; --red: #da1e28;
+      --dark: #161616; --dark-2: #262626; --dark-3: #393939;
+      --gray-10: #f4f4f4; --gray-20: #e0e0e0; --gray-60: #8d8d8d; --gray-70: #525252;
+      --text: #161616; --text-muted: #525252; --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'IBM Plex Sans', system-ui, sans-serif; color: var(--text); background: var(--white); line-height: 1.6; overflow-x: hidden; }
+
+    /* ── NAVBAR ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; background: rgba(22,22,22,0.96); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.3s;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+    .nav-brand svg { width: 28px; height: 28px; }
+    .nav-pill { background: var(--blue); color: white; font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 3px; letter-spacing: 0.07em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 2px; }
+    .nav-links a { color: #c6c6c6; text-decoration: none; font-size: 0.875rem; padding: 0.4rem 1rem; border-radius: 4px; transition: all 0.15s; }
+    .nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+    .nav-links .nav-book { border: 1px solid rgba(255,255,255,0.25); color: white; }
+    .nav-links .nav-book:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+    .nav-links .nav-launch { background: var(--blue); color: white !important; font-weight: 600; }
+    .nav-links .nav-launch:hover { background: var(--blue-dark); }
+    @media (max-width: 700px) { .nav-links a:not(.nav-launch):not(.nav-book) { display: none; } }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 100vh; display: flex; align-items: center;
+      background: #060c14;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(15,98,254,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(0,157,154,0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 80%, rgba(138,63,252,0.1) 0%, transparent 60%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-inner {
+      position: relative; z-index: 2;
+      max-width: 1200px; margin: 0 auto; padding: 7rem 2rem 4rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    @media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; text-align: center; } }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(15,98,254,0.12); border: 1px solid rgba(15,98,254,0.35);
+      color: #74b1ff; padding: 5px 14px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 1.5rem;
+    }
+    .hero-eyebrow .live-dot { width: 6px; height: 6px; background: #42be65; border-radius: 50%; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero-title {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem); font-weight: 700;
+      color: white; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em;
+    }
+    .hero-title em { font-style: normal; background: linear-gradient(90deg, #74b1ff 0%, #4fc9c5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .hero-desc { font-size: 1.05rem; color: #a8a8a8; line-height: 1.75; margin-bottom: 2.5rem; max-width: 500px; }
+    @media (max-width: 900px) { .hero-desc { margin-inline: auto; } }
+
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    @media (max-width: 900px) { .hero-actions { justify-content: center; } }
+
+    .btn-primary-lg {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--blue); color: white; text-decoration: none;
+      padding: 0.95rem 2rem; border-radius: 6px; font-size: 0.95rem; font-weight: 600;
+      transition: background 0.15s, transform 0.15s; border: none; cursor: pointer;
+    }
+    .btn-primary-lg:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-outline-lg {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent; color: white; text-decoration: none;
+      padding: 0.95rem 2rem; border-radius: 6px; font-size: 0.95rem; font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.25); transition: all 0.15s; cursor: pointer;
+    }
+    .btn-outline-lg:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); }
+
+    /* Hero right — floating cards */
+    .hero-visual { position: relative; height: 420px; }
+    @media (max-width: 900px) { .hero-visual { display: none; } }
+
+    .float-card {
+      position: absolute; background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 1rem 1.25rem; color: white;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .float-card-1 { top: 0; right: 0; width: 260px; animation: float1 6s ease-in-out infinite; }
+    .float-card-2 { top: 50%; right: 40px; transform: translateY(-50%); width: 220px; animation: float2 7s ease-in-out infinite; }
+    .float-card-3 { bottom: 20px; right: 20px; width: 200px; animation: float3 5s ease-in-out infinite; }
+    @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes float2 { 0%,100%{transform:translateY(-50%)} 50%{transform:translateY(calc(-50% - 8px))} }
+    @keyframes float3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+    .fc-label { font-size: 0.7rem; color: #a8a8a8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .fc-value { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .fc-sub { font-size: 0.78rem; color: #a8a8a8; }
+    .fc-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .fc-chip { display: inline-block; background: rgba(66,190,101,0.2); color: #42be65; border-radius: 20px; padding: 2px 8px; font-size: 0.72rem; font-weight: 600; margin-top: 4px; }
+    .fc-chip.blue { background: rgba(116,177,255,0.15); color: #74b1ff; }
+
+    /* ── TICKER ── */
+    .ticker { background: var(--blue); padding: 0.6rem 0; overflow: hidden; }
+    .ticker-inner { display: flex; gap: 3rem; white-space: nowrap; animation: ticker 35s linear infinite; }
+    .ticker-item { font-size: 0.8rem; font-weight: 600; color: white; letter-spacing: 0.02em; flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+    .ticker-item::before { content: '✈'; opacity: 0.7; }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── SECTION BASE ── */
+    .section { padding: 5.5rem 2rem; }
+    .section-alt { background: var(--gray-10); }
+    .section-dark { background: var(--dark); color: white; }
+    .container { max-width: 1160px; margin: 0 auto; }
+    .section-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.6rem; }
+    .section-dark .section-eyebrow { color: #74b1ff; }
+    .section-title { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -0.01em; }
+    .section-desc { font-size: 1rem; color: var(--text-muted); max-width: 560px; line-height: 1.75; margin-bottom: 3rem; }
+    .section-dark .section-desc { color: #a8a8a8; }
+
+    /* ── DESTINATIONS SHOWCASE ── */
+    .destinations-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+    }
+    @media (max-width: 900px) { .destinations-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .destinations-grid { grid-template-columns: 1fr; } }
+
+    .dest-card {
+      border-radius: 12px; overflow: hidden; position: relative;
+      height: 280px; cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;
+      text-decoration: none; display: block;
+    }
+    .dest-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .dest-card-img {
+      width: 100%; height: 100%; object-fit: cover;
+      background: linear-gradient(135deg, #1a2744 0%, #0d3b6e 100%);
+    }
+    .dest-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%);
+    }
+    .dest-card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; color: white; }
+    .dest-card-country { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+    .dest-card-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .dest-card-tag { display: inline-block; background: rgba(15,98,254,0.8); color: white; font-size: 0.7rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+    /* SVG-based destination illustrations */
+    .dest-svg-bg { width: 100%; height: 100%; }
+
+    /* ── FEATURES GRID ── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .feature-card {
+      background: white; border: 1px solid var(--gray-20); border-radius: 10px;
+      padding: 1.75rem; transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .feature-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.09); transform: translateY(-2px); }
+    .section-dark .feature-card { background: var(--dark-2); border-color: var(--dark-3); }
+    .feature-icon-wrap {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: rgba(15,98,254,0.1); display: flex; align-items: center;
+      justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .section-dark .feature-title { color: white; }
+    .feature-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+    .section-dark .feature-desc { color: #a8a8a8; }
+    .feature-tag { display: inline-block; margin-top: 1rem; font-size: 0.73rem; font-weight: 600; color: var(--blue); background: rgba(15,98,254,0.08); padding: 3px 10px; border-radius: 20px; }
+    .section-dark .feature-tag { color: #74b1ff; background: rgba(15,98,254,0.2); }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem; }
+    .step { position: relative; }
+    .step-num { width: 44px; height: 44px; background: var(--blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem; }
+    .step-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .step-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── MANUAL BOOKING HIGHLIGHT ── */
+    .booking-cta {
+      background: linear-gradient(135deg, #0d1a2e 0%, #1a0d2e 100%);
+      border-radius: 16px; padding: 3.5rem; display: grid;
+      grid-template-columns: 1fr auto; gap: 2rem; align-items: center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    @media (max-width: 700px) { .booking-cta { grid-template-columns: 1fr; text-align: center; } }
+    .booking-cta h3 { font-size: 1.6rem; font-weight: 700; color: white; margin-bottom: 0.75rem; }
+    .booking-cta p { color: #a8a8a8; font-size: 0.95rem; line-height: 1.7; }
+    .booking-cta-features { margin-top: 1rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .booking-cta-feature { display: flex; align-items: center; gap: 6px; color: #74b1ff; font-size: 0.82rem; font-weight: 600; }
+    .booking-cta-feature::before { content: '✓'; background: rgba(15,98,254,0.2); width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+    .testimonial-card {
+      background: white; border: 1px solid var(--gray-20); border-radius: 10px;
+      padding: 1.5rem; position: relative;
+    }
+    .testimonial-card::before { content: '"'; position: absolute; top: 1rem; right: 1.5rem; font-size: 3rem; font-family: 'IBM Plex Serif', serif; color: var(--gray-20); line-height: 1; }
+    .testimonial-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.25rem; }
+    .testimonial-author { display: flex; align-items: center; gap: 10px; }
+    .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--teal)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .testimonial-name { font-weight: 600; font-size: 0.875rem; }
+    .testimonial-role { font-size: 0.78rem; color: var(--text-muted); }
+    .testimonial-stars { color: #f1c21b; font-size: 0.8rem; margin-bottom: 0.75rem; letter-spacing: 1px; }
+
+    /* ── STATS BAR ── */
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--gray-20); border-bottom: 1px solid var(--gray-20); }
+    @media (max-width: 700px) { .stats-bar { grid-template-columns: 1fr 1fr; } }
+    .stat-item { padding: 2.5rem 2rem; text-align: center; border-right: 1px solid var(--gray-20); }
+    .stat-item:last-child { border-right: none; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+    /* ── TECH CARDS ── */
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; }
+    .tech-card { background: var(--dark-2); border: 1px solid var(--dark-3); border-radius: 10px; padding: 1.5rem; }
+    .tech-card-name { font-size: 0.95rem; font-weight: 700; color: white; margin-bottom: 0.4rem; }
+    .tech-card-desc { font-size: 0.82rem; color: #8d8d8d; line-height: 1.6; }
+    .tech-badge { display: inline-block; margin-top: 0.75rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #4fc9c5; border: 1px solid rgba(79,201,197,0.4); padding: 2px 8px; border-radius: 3px; }
+
+    /* ── CTA BANNER ── */
+    .cta-section { background: var(--blue); padding: 5rem 2rem; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700; color: white; margin-bottom: 1rem; }
+    .cta-section p { color: rgba(255,255,255,0.82); font-size: 1.05rem; max-width: 540px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .cta-btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: white; color: var(--blue); font-weight: 700; text-decoration: none; padding: 0.95rem 2rem; border-radius: 6px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s; }
+    .btn-white:hover { transform: translateY(-1px); }
+    .btn-outline-white { border: 2px solid rgba(255,255,255,0.6); color: white; font-weight: 600; text-decoration: none; padding: 0.95rem 2rem; border-radius: 6px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; }
+    .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--dark); color: #8d8d8d; padding: 3.5rem 2rem 2rem; border-top: 1px solid var(--dark-3); }
+    .footer-grid { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr; gap: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--dark-3); }
+    @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+    .footer-brand { color: white; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; margin-bottom: 0.6rem; }
+    .footer-tagline { font-size: 0.83rem; line-height: 1.65; margin-bottom: 1rem; }
+    .footer-col h4 { color: white; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.5rem; }
+    .footer-col ul li a { color: #8d8d8d; text-decoration: none; font-size: 0.85rem; transition: color 0.15s; }
+    .footer-col ul li a:hover { color: white; }
+    .footer-bottom { max-width: 1160px; margin: 1.5rem auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
+    .footer-bottom a { color: #8d8d8d; text-decoration: none; transition: color 0.15s; }
+    .footer-bottom a:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <svg viewBox="0 0 28 28" fill="none"><path d="M14 3L25 8.5V19.5L14 25L3 19.5V8.5L14 3Z" stroke="#74b1ff" stroke-width="1.5" fill="rgba(15,98,254,0.15)"/><path d="M7 13L14 10L21 13M14 10V21" stroke="#74b1ff" stroke-width="1.5" stroke-linecap="round"/></svg>
+    IBM Travel Planner
+    <span class="nav-pill">Granite AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="#destinations">Destinations</a>
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="/book" class="nav-book">✏ Book Manually</a>
+    <a href="/app" class="nav-launch">Launch App →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">
+        <span class="live-dot"></span>
+        Powered by IBM Granite 4 · IBM watsonx.ai
+      </div>
+      <h1 class="hero-title">
+        Your Intelligent<br>
+        Travel Companion<br>
+        <em>Reimagined.</em>
+      </h1>
+      <p class="hero-desc">
+        From instant AI destination discovery to full day-by-day itineraries,
+        live weather, visa guidance and budget planning — all in one place.
+        Or book your trip manually in minutes, no AI needed.
+      </p>
+      <div class="hero-actions">
+        <a href="/app" class="btn-primary-lg">🚀 Start with AI Agent</a>
+        <a href="/book" class="btn-outline-lg">✏ Book Manually</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="float-card float-card-1">
+        <div class="fc-icon">🗓</div>
+        <div class="fc-label">Itinerary Generated</div>
+        <div class="fc-value">7-Day Tokyo Trip</div>
+        <div class="fc-sub">Day-by-day plan · ¥180,000 est.</div>
+        <span class="fc-chip">✓ Ready to save</span>
+      </div>
+      <div class="float-card float-card-2">
+        <div class="fc-icon">🌤</div>
+        <div class="fc-label">Live Weather · Paris</div>
+        <div class="fc-value">18°C — Partly Cloudy</div>
+        <div class="fc-sub">7-day forecast loaded</div>
+        <span class="fc-chip blue">Open-Meteo API</span>
+      </div>
+      <div class="float-card float-card-3">
+        <div class="fc-icon">💬</div>
+        <div class="fc-label">IBM Granite AI</div>
+        <div class="fc-value">granite-4-h-small</div>
+        <div class="fc-sub">Connected · Ready</div>
+        <span class="fc-chip">● Online</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TICKER ── -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item">AI Destination Suggestions</span>
+    <span class="ticker-item">Day-by-Day Itineraries</span>
+    <span class="ticker-item">Live Weather Forecasts</span>
+    <span class="ticker-item">Transport Comparisons</span>
+    <span class="ticker-item">Hotel Recommendations</span>
+    <span class="ticker-item">Visa & Entry Requirements</span>
+    <span class="ticker-item">Budget Estimation</span>
+    <span class="ticker-item">Smart Packing Lists</span>
+    <span class="ticker-item">Travel Safety Alerts</span>
+    <span class="ticker-item">Manual Trip Booking</span>
+    <span class="ticker-item">Booking Management</span>
+    <span class="ticker-item">Schedule Optimizer</span>
+    <!-- duplicate for loop -->
+    <span class="ticker-item">AI Destination Suggestions</span>
+    <span class="ticker-item">Day-by-Day Itineraries</span>
+    <span class="ticker-item">Live Weather Forecasts</span>
+    <span class="ticker-item">Transport Comparisons</span>
+    <span class="ticker-item">Hotel Recommendations</span>
+    <span class="ticker-item">Visa & Entry Requirements</span>
+    <span class="ticker-item">Budget Estimation</span>
+    <span class="ticker-item">Smart Packing Lists</span>
+    <span class="ticker-item">Travel Safety Alerts</span>
+    <span class="ticker-item">Manual Trip Booking</span>
+    <span class="ticker-item">Booking Management</span>
+    <span class="ticker-item">Schedule Optimizer</span>
+  </div>
+</div>
+
+<!-- ── STATS ── -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-value">12+</div><div class="stat-label">AI Features</div></div>
+  <div class="stat-item"><div class="stat-value">14-day</div><div class="stat-label">Weather Forecast</div></div>
+  <div class="stat-item"><div class="stat-value">Free</div><div class="stat-label">IBM Cloud Lite</div></div>
+  <div class="stat-item"><div class="stat-value">Live</div><div class="stat-label">Real-Time Data</div></div>
+</div>
+
+<!-- ── POPULAR DESTINATIONS ── -->
+<section class="section" id="destinations">
+  <div class="container">
+    <div class="section-eyebrow">Popular Destinations</div>
+    <h2 class="section-title">Where Will You Go Next?</h2>
+    <p class="section-desc">Let our AI agent tailor a full trip plan for any of these destinations, or explore your own dream location.</p>
+
+    <div class="destinations-grid">
+      <!-- Tokyo -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img" style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="280" fill="url(#tokyo-bg)"/>
+            <defs><linearGradient id="tokyo-bg" x1="0" y1="0" x2="400" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#1a1a2e"/><stop offset="1" stop-color="#0f3460"/></linearGradient></defs>
+            <!-- Mount Fuji -->
+            <polygon points="200,80 260,180 140,180" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            <polygon points="200,80 220,105 180,105" fill="rgba(255,255,255,0.2)"/>
+            <!-- Torii gate -->
+            <rect x="170" y="185" width="4" height="60" fill="rgba(218,30,40,0.6)"/>
+            <rect x="226" y="185" width="4" height="60" fill="rgba(218,30,40,0.6)"/>
+            <rect x="162" y="185" width="80" height="7" rx="3" fill="rgba(218,30,40,0.7)"/>
+            <rect x="168" y="198" width="64" height="5" rx="2" fill="rgba(218,30,40,0.5)"/>
+            <!-- Stars -->
+            <circle cx="60" cy="50" r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="120" cy="30" r="1" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="300" cy="60" r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="350" cy="40" r="1" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="80" cy="90" r="1" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="330" cy="100" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <!-- Ground/city -->
+            <rect x="0" y="230" width="400" height="50" fill="rgba(0,0,0,0.3)"/>
+            <rect x="20" y="210" width="20" height="20" fill="rgba(255,255,255,0.05)"/>
+            <rect x="60" y="200" width="30" height="30" fill="rgba(255,255,255,0.04)"/>
+            <rect x="320" y="205" width="25" height="25" fill="rgba(255,255,255,0.05)"/>
+            <rect x="360" y="215" width="15" height="15" fill="rgba(255,255,255,0.04)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">Japan</div>
+          <div class="dest-card-name">Tokyo</div>
+          <span class="dest-card-tag">Culture · Food · Tech</span>
+        </div>
+      </a>
+
+      <!-- Paris -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img" style="background:linear-gradient(135deg,#1a0a2e 0%,#2d1b69 50%,#11998e 100%);">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none">
+            <defs><linearGradient id="paris-bg" x1="0" y1="0" x2="400" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#0d1b2a"/><stop offset="1" stop-color="#1c3a5e"/></linearGradient></defs>
+            <rect width="400" height="280" fill="url(#paris-bg)"/>
+            <!-- Eiffel Tower silhouette -->
+            <polygon points="200,50 225,200 175,200" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+            <rect x="185" y="130" width="30" height="4" rx="2" fill="rgba(255,255,255,0.15)"/>
+            <rect x="180" y="160" width="40" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>
+            <rect x="175" y="190" width="50" height="4" rx="2" fill="rgba(255,255,255,0.1)"/>
+            <circle cx="200" cy="50" r="3" fill="rgba(255,215,0,0.8)"/>
+            <!-- Seine river -->
+            <path d="M0,220 Q100,215 200,222 Q300,229 400,220" stroke="rgba(15,98,254,0.4)" stroke-width="8" fill="none"/>
+            <!-- Buildings -->
+            <rect x="30" y="175" width="40" height="45" fill="rgba(255,255,255,0.05)"/>
+            <rect x="320" y="170" width="50" height="50" fill="rgba(255,255,255,0.05)"/>
+            <rect x="50" y="165" width="25" height="55" fill="rgba(255,255,255,0.04)"/>
+            <!-- Stars -->
+            <circle cx="50" cy="40" r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="350" cy="35" r="1" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="90" cy="70" r="1" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="310" cy="80" r="1.5" fill="rgba(255,255,255,0.5)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">France</div>
+          <div class="dest-card-name">Paris</div>
+          <span class="dest-card-tag">Romance · Art · Cuisine</span>
+        </div>
+      </a>
+
+      <!-- Bali -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img" style="background:linear-gradient(135deg,#0a2a0a 0%,#1a4a1a 50%,#2d6a2d 100%);">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none">
+            <defs><linearGradient id="bali-bg" x1="0" y1="0" x2="400" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#0a1f0a"/><stop offset="1" stop-color="#1e3a1e"/></linearGradient>
+            <linearGradient id="bali-sky" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#f59e0b" stop-opacity="0.5"/><stop offset="1" stop-color="#dc2626" stop-opacity="0.2"/></linearGradient></defs>
+            <rect width="400" height="280" fill="url(#bali-bg)"/>
+            <!-- Sunset sky -->
+            <ellipse cx="200" cy="0" rx="250" ry="120" fill="rgba(245,158,11,0.15)"/>
+            <circle cx="200" cy="80" r="40" fill="rgba(251,191,36,0.25)"/>
+            <!-- Temple -->
+            <rect x="180" y="140" width="40" height="80" fill="rgba(255,255,255,0.07)"/>
+            <polygon points="175,140 200,110 225,140" fill="rgba(255,255,255,0.1)"/>
+            <polygon points="182,110 200,90 218,110" fill="rgba(255,255,255,0.08)"/>
+            <polygon points="190,90 200,78 210,90" fill="rgba(255,255,255,0.07)"/>
+            <!-- Rice terraces -->
+            <path d="M0,200 Q50,190 100,200 Q150,210 200,200 Q250,190 300,200 Q350,210 400,200" stroke="rgba(34,197,94,0.3)" stroke-width="3" fill="none"/>
+            <path d="M0,215 Q50,205 100,215 Q150,225 200,215 Q250,205 300,215 Q350,225 400,215" stroke="rgba(34,197,94,0.25)" stroke-width="3" fill="none"/>
+            <!-- Palm trees -->
+            <line x1="40" y1="240" x2="50" y2="150" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+            <ellipse cx="50" cy="150" rx="20" ry="12" fill="rgba(34,197,94,0.3)" transform="rotate(-15,50,150)"/>
+            <line x1="360" y1="240" x2="355" y2="155" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+            <ellipse cx="355" cy="155" rx="18" ry="11" fill="rgba(34,197,94,0.3)" transform="rotate(10,355,155)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">Indonesia</div>
+          <div class="dest-card-name">Bali</div>
+          <span class="dest-card-tag">Wellness · Beach · Temples</span>
+        </div>
+      </a>
+
+      <!-- New York -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none">
+            <defs><linearGradient id="ny-bg" x1="0" y1="0" x2="0" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#0a0a1a"/><stop offset="1" stop-color="#1a1a2e"/></linearGradient></defs>
+            <rect width="400" height="280" fill="url(#ny-bg)"/>
+            <!-- Skyline buildings -->
+            <rect x="10" y="160" width="25" height="120" fill="rgba(255,255,255,0.07)"/>
+            <rect x="40" y="130" width="20" height="150" fill="rgba(255,255,255,0.08)"/>
+            <rect x="65" y="150" width="30" height="130" fill="rgba(255,255,255,0.06)"/>
+            <rect x="100" y="100" width="18" height="180" fill="rgba(255,255,255,0.09)"/>
+            <rect x="122" y="140" width="25" height="140" fill="rgba(255,255,255,0.07)"/>
+            <!-- Empire State -->
+            <rect x="175" y="70" width="30" height="210" fill="rgba(255,255,255,0.1)"/>
+            <rect x="182" y="60" width="16" height="20" fill="rgba(255,255,255,0.1)"/>
+            <rect x="188" y="50" width="4" height="15" fill="rgba(255,255,255,0.12)"/>
+            <rect x="160" y="120" width="60" height="10" fill="rgba(255,255,255,0.06)"/>
+            <rect x="168" y="140" width="44" height="8" fill="rgba(255,255,255,0.05)"/>
+            <!-- Right buildings -->
+            <rect x="225" y="120" width="30" height="160" fill="rgba(255,255,255,0.08)"/>
+            <rect x="260" y="145" width="22" height="135" fill="rgba(255,255,255,0.07)"/>
+            <rect x="290" y="110" width="35" height="170" fill="rgba(255,255,255,0.09)"/>
+            <rect x="332" y="155" width="25" height="125" fill="rgba(255,255,255,0.06)"/>
+            <rect x="362" y="135" width="30" height="145" fill="rgba(255,255,255,0.07)"/>
+            <!-- Windows (lit) -->
+            <rect x="45" y="140" width="4" height="3" fill="rgba(255,215,0,0.5)"/>
+            <rect x="52" y="148" width="4" height="3" fill="rgba(255,215,0,0.4)"/>
+            <rect x="107" y="115" width="4" height="3" fill="rgba(255,215,0,0.5)"/>
+            <rect x="113" y="125" width="4" height="3" fill="rgba(255,215,0,0.4)"/>
+            <rect x="183" y="85" width="4" height="3" fill="rgba(255,215,0,0.5)"/>
+            <rect x="298" y="125" width="4" height="3" fill="rgba(255,215,0,0.5)"/>
+            <rect x="305" y="135" width="4" height="3" fill="rgba(255,215,0,0.4)"/>
+            <!-- Stars -->
+            <circle cx="30" cy="30" r="1.5" fill="rgba(255,255,255,0.7)"/>
+            <circle cx="80" cy="20" r="1" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="340" cy="25" r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="380" cy="50" r="1" fill="rgba(255,255,255,0.5)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">United States</div>
+          <div class="dest-card-name">New York</div>
+          <span class="dest-card-tag">City · Shopping · Culture</span>
+        </div>
+      </a>
+
+      <!-- Dubai -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none">
+            <defs><linearGradient id="dubai-bg" x1="0" y1="0" x2="0" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#0a1628"/><stop offset="1" stop-color="#1a2a4a"/></linearGradient></defs>
+            <rect width="400" height="280" fill="url(#dubai-bg)"/>
+            <!-- Desert horizon glow -->
+            <ellipse cx="200" cy="280" rx="300" ry="80" fill="rgba(245,158,11,0.1)"/>
+            <!-- Burj Khalifa -->
+            <rect x="195" y="40" width="10" height="200" fill="rgba(255,255,255,0.12)"/>
+            <rect x="192" y="80" width="16" height="160" fill="rgba(255,255,255,0.08)"/>
+            <rect x="188" y="120" width="24" height="120" fill="rgba(255,255,255,0.07)"/>
+            <rect x="184" y="160" width="32" height="80" fill="rgba(255,255,255,0.06)"/>
+            <rect x="197" y="30" width="6" height="14" fill="rgba(255,255,255,0.15)"/>
+            <rect x="199" y="20" width="2" height="12" fill="rgba(255,255,255,0.18)"/>
+            <!-- Other buildings -->
+            <rect x="60" y="140" width="40" height="140" fill="rgba(255,255,255,0.07)" rx="2"/>
+            <rect x="80" y="120" width="20" height="10" fill="rgba(255,255,255,0.07)"/>
+            <rect x="110" y="160" width="30" height="120" fill="rgba(255,255,255,0.06)"/>
+            <rect x="240" y="155" width="35" height="125" fill="rgba(255,255,255,0.07)"/>
+            <rect x="280" y="130" width="45" height="150" fill="rgba(255,255,255,0.06)"/>
+            <rect x="330" y="160" width="30" height="120" fill="rgba(255,255,255,0.07)"/>
+            <!-- Moon + stars -->
+            <circle cx="330" cy="60" r="20" fill="rgba(255,215,0,0.12)"/>
+            <circle cx="338" cy="56" r="16" fill="#0a1628"/>
+            <circle cx="60" cy="40" r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="140" cy="30" r="1" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="280" cy="45" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <!-- Water reflection -->
+            <rect x="0" y="250" width="400" height="30" fill="rgba(15,98,254,0.15)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">UAE</div>
+          <div class="dest-card-name">Dubai</div>
+          <span class="dest-card-tag">Luxury · Shopping · Desert</span>
+        </div>
+      </a>
+
+      <!-- Santorini -->
+      <a href="/app" class="dest-card" style="text-decoration:none;">
+        <div class="dest-card-img">
+          <svg class="dest-svg-bg" viewBox="0 0 400 280" fill="none">
+            <defs><linearGradient id="sant-bg" x1="0" y1="0" x2="0" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#0a1f3a"/><stop offset="1" stop-color="#0d47a1"/></linearGradient></defs>
+            <rect width="400" height="280" fill="url(#sant-bg)"/>
+            <!-- Ocean -->
+            <rect x="0" y="200" width="400" height="80" fill="rgba(15,98,254,0.3)"/>
+            <!-- White houses on cliff -->
+            <path d="M50,200 Q150,160 250,170 Q320,160 380,170 L380,280 L50,280Z" fill="rgba(100,120,160,0.3)"/>
+            <!-- White cuboid buildings -->
+            <rect x="80" y="165" width="35" height="35" fill="rgba(255,255,255,0.85)" rx="2"/>
+            <rect x="118" y="155" width="30" height="45" fill="rgba(255,255,255,0.8)" rx="2"/>
+            <rect x="152" y="160" width="40" height="40" fill="rgba(255,255,255,0.85)" rx="2"/>
+            <rect x="196" y="150" width="28" height="50" fill="rgba(255,255,255,0.8)" rx="2"/>
+            <rect x="228" y="158" width="35" height="42" fill="rgba(255,255,255,0.85)" rx="2"/>
+            <rect x="267" y="162" width="30" height="38" fill="rgba(255,255,255,0.8)" rx="2"/>
+            <!-- Blue domes -->
+            <ellipse cx="135" cy="155" rx="15" ry="9" fill="rgba(15,98,254,0.8)"/>
+            <ellipse cx="210" cy="150" rx="14" ry="8" fill="rgba(15,98,254,0.8)"/>
+            <ellipse cx="282" cy="162" rx="13" ry="8" fill="rgba(15,98,254,0.7)"/>
+            <!-- Sun -->
+            <circle cx="320" cy="60" r="30" fill="rgba(255,159,0,0.3)"/>
+            <circle cx="320" cy="60" r="18" fill="rgba(255,159,0,0.5)"/>
+            <!-- Stars -->
+            <circle cx="50" cy="40" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="100" cy="25" r="1" fill="rgba(255,255,255,0.4)"/>
+          </svg>
+        </div>
+        <div class="dest-card-overlay" style="background:linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)"></div>
+        <div class="dest-card-content">
+          <div class="dest-card-country">Greece</div>
+          <div class="dest-card-name">Santorini</div>
+          <span class="dest-card-tag">Romance · Scenic · Island</span>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align:center; margin-top:2.5rem;">
+      <a href="/app" class="btn-primary-lg">🌍 Explore All Destinations with AI</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── MANUAL BOOKING HIGHLIGHT ── -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="booking-cta">
+      <div>
+        <div class="section-eyebrow" style="color:#74b1ff;">No AI? No Problem.</div>
+        <h3>Book Your Trip Manually</h3>
+        <p>Prefer full control? Use our structured booking form to plan flights, accommodation, activities and traveler details — entirely on your own terms, without any AI involvement.</p>
+        <div class="booking-cta-features">
+          <span class="booking-cta-feature">Flight details</span>
+          <span class="booking-cta-feature">Hotel booking</span>
+          <span class="booking-cta-feature">Multi-traveler support</span>
+          <span class="booking-cta-feature">Activity planning</span>
+          <span class="booking-cta-feature">Booking confirmation</span>
+        </div>
+      </div>
+      <div style="flex-shrink:0;">
+        <a href="/book" class="btn-primary-lg" style="white-space:nowrap;">✏ Book Manually →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-eyebrow">AI Capabilities</div>
+    <h2 class="section-title">Everything Powered by IBM Granite</h2>
+    <p class="section-desc">12 intelligent features — from destination discovery to packing lists — all running on IBM's enterprise AI, free on the Cloud Lite tier.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon-wrap">💬</div><div class="feature-title">Conversational Chat Agent</div><p class="feature-desc">Full session memory, intent detection, and context-aware travel planning in a natural chat interface powered by IBM Granite.</p><span class="feature-tag">IBM Granite NLU</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">🌍</div><div class="feature-title">Destination Discovery</div><p class="feature-desc">5 tailored recommendations based on your budget, style, duration and departure city — with cost estimates and highlights.</p><span class="feature-tag">AI Recommendations</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📅</div><div class="feature-title">Itinerary Builder</div><p class="feature-desc">Complete day-by-day plans with morning, afternoon and evening activities, meals, transport and accommodation notes.</p><span class="feature-tag">Generation AI</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">🌤</div><div class="feature-title">Live Weather Forecasts</div><p class="feature-desc">Real 14-day forecasts via Open-Meteo, automatically integrated into itinerary recommendations.</p><span class="feature-tag">Open-Meteo API</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">🚀</div><div class="feature-title">Transport Comparisons</div><p class="feature-desc">Flights, trains, buses and ferries compared side-by-side with cost, comfort ratings, and local transport tips.</p><span class="feature-tag">AI-Powered</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">🏨</div><div class="feature-title">Accommodation Finder</div><p class="feature-desc">Hotels, hostels, resorts and Airbnbs matched to your budget, style and dates with area recommendations.</p><span class="feature-tag">Smart Matching</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">💰</div><div class="feature-title">Budget Planner</div><p class="feature-desc">Detailed cost breakdowns for accommodation, food, transport, activities — with money-saving tips per destination.</p><span class="feature-tag">Cost Intelligence</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📋</div><div class="feature-title">Visa & Entry Requirements</div><p class="feature-desc">Instant guidance for any nationality/destination pair — type, processing time, cost, documents, health requirements.</p><span class="feature-tag">AI Knowledge</span></div>
+      <div class="feature-card"><div class="feature-icon-wrap">🎒</div><div class="feature-title">Smart Packing Lists</div><p class="feature-desc">AI-generated checklists tailored to your destination climate and activities — from arctic to tropical.</p><span class="feature-tag">Context-Aware</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section section-alt" id="how-it-works">
+  <div class="container">
+    <div class="section-eyebrow">Simple Process</div>
+    <h2 class="section-title">Plan Your Trip in 4 Steps</h2>
+    <p class="section-desc">From idea to fully planned itinerary in minutes. IBM Granite does the heavy lifting — you just travel.</p>
+    <div class="steps-grid">
+      <div class="step"><div class="step-num">1</div><div class="step-title">Share Your Preferences</div><p class="step-desc">Tell the agent where you want to go, your budget, travel style, duration, and any special interests.</p></div>
+      <div class="step"><div class="step-num">2</div><div class="step-title">Get AI Recommendations</div><p class="step-desc">IBM Granite suggests destinations, explains why each suits you, and provides cost estimates.</p></div>
+      <div class="step"><div class="step-num">3</div><div class="step-title">Build Your Itinerary</div><p class="step-desc">Generate a complete day-by-day plan with activities, meals, accommodation and live weather context.</p></div>
+      <div class="step"><div class="step-num">4</div><div class="step-title">Refine & Save</div><p class="step-desc">Tweak via chat, check visa requirements and alerts, then save your booking record with a packing list.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">Traveler Stories</div>
+    <h2 class="section-title">Loved by Travelers</h2>
+    <p class="section-desc">See how IBM Travel Planner has helped people plan smarter, stress-free trips.</p>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Planned our entire 10-day Japan honeymoon in under an hour. The day-by-day itinerary was incredibly detailed — restaurants, backup plans, even the subway routes."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">P</div><div><div class="testimonial-name">Priya Sharma</div><div class="testimonial-role">Traveled to Tokyo & Kyoto</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The budget planner was a game-changer. I could see exactly where my money was going before booking anything. Saved at least ₹30,000 by switching hotels."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">A</div><div><div class="testimonial-name">Arjun Mehta</div><div class="testimonial-role">Solo trip to Europe</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Used the manual booking form for a family trip — clean, simple, no fuss. Then ran the AI packing list and it covered things I never would have thought of."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">S</div><div><div class="testimonial-name">Sarah Mitchell</div><div class="testimonial-role">Family trip to Bali</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TECHNOLOGY ── -->
+<section class="section section-dark" id="technology">
+  <div class="container">
+    <div class="section-eyebrow">Built With</div>
+    <h2 class="section-title" style="color:white;">Enterprise AI on Free Tier</h2>
+    <p class="section-desc">IBM Granite power accessible through IBM Cloud Lite — zero cost, full capability.</p>
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-card-name">IBM Granite 4</div><p class="tech-card-desc">IBM's latest foundation model delivers natural language understanding, structured JSON generation, and conversational planning across all agent features.</p><span class="tech-badge">ibm/granite-4-h-small</span></div>
+      <div class="tech-card"><div class="tech-card-name">IBM watsonx.ai</div><p class="tech-card-desc">Enterprise AI platform serves Granite via the <code style="color:#74b1ff;font-size:0.8rem;">ibm-watsonx-ai</code> Python SDK — available free on the IBM Cloud Lite tier.</p><span class="tech-badge">IBM Cloud Lite</span></div>
+      <div class="tech-card"><div class="tech-card-name">Open-Meteo Weather API</div><p class="tech-card-desc">Real-time 14-day weather forecasts — no API key needed. Current conditions, daily max/min, precipitation and UV index.</p><span class="tech-badge">Free · No Key</span></div>
+      <div class="tech-card"><div class="tech-card-name">OpenStreetMap Nominatim</div><p class="tech-card-desc">Free geocoding converts destination names to coordinates for the weather API. Open data, no account required.</p><span class="tech-badge">Free · Open Data</span></div>
+      <div class="tech-card"><div class="tech-card-name">Python / Flask</div><p class="tech-card-desc">Lightweight REST API with 20+ endpoints — AI calls, weather, booking management and serving the frontend.</p><span class="tech-badge">Flask 3.0</span></div>
+      <div class="tech-card"><div class="tech-card-name">Vanilla JS Frontend</div><p class="tech-card-desc">Zero-dependency browser frontend with IBM Carbon Design System tokens — 12 panels, responsive, real-time chat.</p><span class="tech-badge">No Framework</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Plan Your Next Adventure?</h2>
+    <p>Choose the AI-powered agent for smart planning, or jump straight into the manual booking form — both free, both powerful.</p>
+    <div class="cta-btn-group">
+      <a href="/app" class="btn-white">🚀 Launch AI Agent</a>
+      <a href="/book" class="btn-outline-white">✏ Book Manually</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 8.5V19.5L14 25L3 19.5V8.5L14 3Z" stroke="#74b1ff" stroke-width="1.5" fill="rgba(15,98,254,0.15)"/><path d="M7 13L14 10L21 13M14 10V21" stroke="#74b1ff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        IBM Travel Planner Agent
+        <span style="background:var(--blue);color:white;font-size:0.6rem;padding:1px 6px;border-radius:3px;font-weight:800;">GRANITE</span>
+      </div>
+      <p class="footer-tagline">AI-powered travel planning built on IBM Granite via IBM watsonx.ai Cloud Lite. Plan smarter, travel better — with or without AI.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Plan</h4>
+      <ul>
+        <li><a href="/app#destinations">AI Destinations</a></li>
+        <li><a href="/app#itinerary">Itinerary Builder</a></li>
+        <li><a href="/app#budget">Budget Planner</a></li>
+        <li><a href="/book">Manual Booking</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Travel Info</h4>
+      <ul>
+        <li><a href="/app#weather">Weather Forecast</a></li>
+        <li><a href="/app#transport">Transport</a></li>
+        <li><a href="/app#accommodation">Accommodation</a></li>
+        <li><a href="/app#visa">Visa Info</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Technology</h4>
+      <ul>
+        <li><a href="https://www.ibm.com/watsonx" target="_blank">IBM watsonx.ai</a></li>
+        <li><a href="https://cloud.ibm.com" target="_blank">IBM Cloud Lite</a></li>
+        <li><a href="https://open-meteo.com" target="_blank">Open-Meteo</a></li>
+        <li><a href="/api/health" target="_blank">API Status</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 IBM Travel Planner Agent — AICTE Project · Built with IBM Granite AI</span>
+    <span>
+      <a href="/app">Launch App</a> &nbsp;·&nbsp;
+      <a href="/book">Manual Booking</a> &nbsp;·&nbsp;
+      <a href="/api/health">API Health</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

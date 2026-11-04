@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard — {{ app_name }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#0f62fe;--dark:#161616;--gray:#f4f4f4;--border:#e0e0e0;--text:#161616;--muted:#525252;--green:#198038;--red:#da1e28;}
+    body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--gray);color:var(--text);min-height:100vh;}
+    /* Nav */
+    .nav{background:var(--dark);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:100;}
+    .nav-brand{display:flex;align-items:center;gap:8px;color:white;text-decoration:none;font-weight:700;font-size:.95rem;}
+    .ibm-pill{background:var(--blue);font-size:.6rem;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:.07em;color:white;}
+    .nav-right{display:flex;align-items:center;gap:.75rem;}
+    .nav-right a{color:#a8a8a8;text-decoration:none;font-size:.8rem;transition:color .15s;padding:.3rem .7rem;border-radius:4px;}
+    .nav-right a:hover{color:white;background:rgba(255,255,255,.08);}
+    .nav-right .nav-active{color:#74b1ff;background:rgba(15,98,254,.15);}
+    /* Layout */
+    .dash-layout{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+    .dash-title h1{font-size:1.5rem;font-weight:700;}
+    .dash-title p{color:var(--muted);font-size:.9rem;margin-top:2px;}
+    /* Stat cards */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
+    .stat-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.25rem;display:flex;flex-direction:column;gap:4px;}
+    .stat-value{font-size:2rem;font-weight:800;color:var(--blue);}
+    .stat-label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+    .stat-icon{font-size:1.4rem;margin-bottom:4px;}
+    .stat-card.green .stat-value{color:var(--green);}
+    .stat-card.dark{background:var(--dark);color:white;}
+    .stat-card.dark .stat-label{color:#a8a8a8;}
+    .stat-card.dark .stat-value{color:#74b1ff;}
+    /* Sections */
+    .section-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+    .card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+    /* Booking table */
+    table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    th{text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:.5rem .75rem;border-bottom:2px solid var(--border);}
+    td{padding:.75rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.73rem;font-weight:600;}
+    .badge-green{background:#defbe6;color:var(--green);}
+    .badge-red{background:#fff1f1;color:var(--red);}
+    .badge-yellow{background:#fff8e1;color:#6f4e00;}
+    /* Charts row */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+    @media(max-width:700px){.charts-row{grid-template-columns:1fr;}}
+    .chart-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+    /* Traveler badge */
+    .traveler-badge{display:flex;align-items:center;gap:.75rem;background:linear-gradient(135deg,var(--dark),#0d1f3c);color:white;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;}
+    .traveler-icon{font-size:2.5rem;}
+    .traveler-level{font-size:1.1rem;font-weight:700;}
+    .traveler-sub{color:#a8a8a8;font-size:.82rem;}
+    /* Carbon */
+    .carbon-card{background:linear-gradient(135deg,#0a2a0a,#1a4a1a);color:white;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+    .carbon-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1rem;}
+    .carbon-stat{text-align:center;}
+    .carbon-value{font-size:1.5rem;font-weight:800;color:#42be65;}
+    .carbon-label{font-size:.75rem;color:#a8a8a8;margin-top:2px;}
+    /* Quick actions */
+    .quick-actions{display:flex;gap:.75rem;flex-wrap:wrap;}
+    .qa-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.25rem;border-radius:5px;font-size:.875rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all .15s;}
+    .qa-primary{background:var(--blue);color:white;}
+    .qa-primary:hover{background:#0043ce;}
+    .qa-secondary{background:white;color:var(--blue);border:1px solid var(--blue);}
+    .qa-secondary:hover{background:#edf5ff;}
+    /* Loading */
+    #loading{text-align:center;padding:3rem;color:var(--muted);}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 8.5V19.5L14 25L3 19.5V8.5L14 3Z" stroke="#74b1ff" stroke-width="1.5" fill="rgba(15,98,254,0.15)"/><path d="M7 13L14 10L21 13M14 10V21" stroke="#74b1ff" stroke-width="1.5" stroke-linecap="round"/></svg>
+    IBM Travel Planner <span class="ibm-pill">AI</span>
+  </a>
+  <div class="nav-right">
+    <a href="/">Home</a>
+    <a href="/app">AI Agent</a>
+    <a href="/book">Book Trip</a>
+    <a href="/dashboard" class="nav-active">📊 Dashboard</a>
+    <span id="user-greeting" style="color:#74b1ff;font-size:.8rem;font-weight:600;"></span>
+    <a href="#" id="logout-btn" style="display:none;" onclick="doLogout()">Sign Out</a>
+    <a href="/login" id="login-btn">Sign In</a>
+  </div>
+</nav>
+
+<div class="dash-layout">
+  <div id="loading">⏳ Loading your dashboard…</div>
+  <div id="dashboard-content" style="display:none;">
+    <div class="dash-header">
+      <div class="dash-title">
+        <h1 id="welcome-title">My Travel Dashboard</h1>
+        <p>Your trip statistics, bookings, and travel analytics at a glance</p>
+      </div>
+      <div class="quick-actions">
+        <a href="/app" class="qa-btn qa-primary">🤖 AI Planner</a>
+        <a href="/book" class="qa-btn qa-secondary">✈ Book Trip</a>
+      </div>
+    </div>
+
+    <!-- Traveler Level -->
+    <div class="traveler-badge" id="traveler-badge">
+      <div class="traveler-icon" id="traveler-icon">🌱</div>
+      <div>
+        <div class="traveler-level" id="traveler-level">Explorer</div>
+        <div class="traveler-sub" id="traveler-sub">Keep traveling to level up!</div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="stat-icon">✈</div><div class="stat-value" id="s-total">0</div><div class="stat-label">Total Trips</div></div>
+      <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value" id="s-confirmed">0</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat-card"><div class="stat-icon">🌍</div><div class="stat-value" id="s-destinations">0</div><div class="stat-label">Destinations</div></div>
+      <div class="stat-card"><div class="stat-icon">🌙</div><div class="stat-value" id="s-nights">0</div><div class="stat-label">Nights Traveled</div></div>
+      <div class="stat-card dark"><div class="stat-icon">🚀</div><div class="stat-value" id="s-upcoming">0</div><div class="stat-label">Upcoming Trips</div></div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="section-title">🌍 Top Destinations</div>
+        <canvas id="destChart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="section-title">📁 Trip Types</div>
+        <canvas id="typeChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Carbon Footprint -->
+    <div class="carbon-card" id="carbon-section" style="display:none;">
+      <div class="section-title" style="color:white;">🌿 Carbon Footprint Estimate</div>
+      <div class="carbon-row">
+        <div class="carbon-stat"><div class="carbon-value" id="c-kg">—</div><div class="carbon-label">kg CO₂ Total</div></div>
+        <div class="carbon-stat"><div class="carbon-value" id="c-rating" style="color:#f59e0b;">—</div><div class="carbon-label">Carbon Rating</div></div>
+        <div class="carbon-stat"><div class="carbon-value" id="c-trees">—</div><div class="carbon-label">Trees to Offset/yr</div></div>
+      </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card">
+      <div class="section-title">📁 Recent Bookings <a href="/book" style="font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;margin-left:auto;">+ New Booking</a></div>
+      <div id="bookings-table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Trip</th><th>Destination</th><th>Dates</th><th>Traveler</th><th>Status</th><th>PDF</th></tr></thead>
+          <tbody id="bookings-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Popular Destinations -->
+    <div class="card">
+      <div class="section-title">🔥 Trending Destinations</div>
+      <div id="popular-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+
+async function loadDashboard() {
+  // Check auth
+  const authResp = await fetch(`${API}/auth/me`, {credentials:'include'});
+  const authData = await authResp.json();
+  if (authData.authenticated) {
+    const u = authData.user;
+    document.getElementById('user-greeting').textContent = `Hi, ${u.first_name || u.username}!`;
+    document.getElementById('logout-btn').style.display = 'inline';
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('welcome-title').textContent = `${u.first_name || u.username}'s Dashboard`;
+  }
+
+  // Load stats
+  const [statsResp, bookingsResp, popularResp] = await Promise.all([
+    fetch(`${API}/analytics/stats`, {credentials:'include'}),
+    fetch(`${API}/bookings`, {credentials:'include'}),
+    fetch(`${API}/analytics/popular`),
+  ]);
+  const stats = await statsResp.json();
+  const bookingsData = await bookingsResp.json();
+  const popularData = await popularResp.json();
+
+  // Fill stats
+  document.getElementById('s-total').textContent = stats.total_bookings || 0;
+  document.getElementById('s-confirmed').textContent = stats.confirmed_trips || 0;
+  document.getElementById('s-destinations').textContent = stats.unique_destinations || 0;
+  document.getElementById('s-nights').textContent = stats.total_nights_traveled || 0;
+  document.getElementById('s-upcoming').textContent = stats.upcoming_trips || 0;
+
+  // Traveler level
+  const lvl = stats.traveler_level || {};
+  document.getElementById('traveler-icon').textContent = lvl.icon || '🌱';
+  document.getElementById('traveler-level').textContent = lvl.level || 'Explorer';
+  document.getElementById('traveler-sub').textContent = lvl.next_at
+    ? `${stats.total_nights_traveled || 0} / ${lvl.next_at} nights to next level`
+    : '🏆 Maximum level achieved!';
+
+  // Charts
+  const topDest = (stats.top_destinations || []).slice(0, 5);
+  if (topDest.length > 0) {
+    new Chart(document.getElementById('destChart'), {
+      type: 'bar',
+      data: {
+        labels: topDest.map(d => d.destination.split(',')[0]),
+        datasets: [{ data: topDest.map(d => d.count), backgroundColor: '#0f62fe', borderRadius: 4 }]
+      },
+      options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}, responsive:true }
+    });
+  } else {
+    document.getElementById('destChart').parentElement.innerHTML = '<div class="section-title">🌍 Top Destinations</div><p style="color:#525252;font-size:.875rem;padding:.5rem 0;">No trips yet. <a href="/app" style="color:#0f62fe;">Plan your first trip!</a></p>';
+  }
+  const types = stats.booking_types || {};
+  if (Object.keys(types).length > 0) {
+    new Chart(document.getElementById('typeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(types).map(t => t.charAt(0).toUpperCase()+t.slice(1)),
+        datasets: [{ data: Object.values(types), backgroundColor: ['#0f62fe','#009d9a','#8a3ffc','#198038','#f1c21b'] }]
+      },
+      options: { plugins:{legend:{position:'bottom'}}, responsive:true }
+    });
+  } else {
+    document.getElementById('typeChart').parentElement.innerHTML = '<div class="section-title">📁 Trip Types</div><p style="color:#525252;font-size:.875rem;padding:.5rem 0;">Book a trip to see analytics.</p>';
+  }
+
+  // Bookings table
+  const bookings = bookingsData.bookings || [];
+  const tbody = document.getElementById('bookings-tbody');
+  if (bookings.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#525252;padding:2rem;">No bookings yet. <a href="/book" style="color:#0f62fe;">Create your first booking!</a></td></tr>';
+  } else {
+    tbody.innerHTML = bookings.slice(0,10).map(b => `
+      <tr>
+        <td style="font-family:monospace;font-size:.8rem;color:#0f62fe;">TRV-${b.id}</td>
+        <td style="font-weight:600;">${b.trip_name}</td>
+        <td>${b.destination}</td>
+        <td style="font-size:.8rem;color:#525252;">${b.start_date} → ${b.end_date}</td>
+        <td>${b.traveler_name}</td>
+        <td><span class="badge ${b.status==='confirmed'?'badge-green':b.status==='cancelled'?'badge-red':'badge-yellow'}">${b.status}</span></td>
+        <td><a href="/api/bookings/${b.id}/pdf" style="color:#0f62fe;font-size:.8rem;font-weight:600;text-decoration:none;" target="_blank">📄 PDF</a></td>
+      </tr>`).join('');
+  }
+
+  // Popular destinations
+  const popular = popularData.destinations || [];
+  document.getElementById('popular-list').innerHTML = popular.slice(0,6).map(d => `
+    <div style="background:#f4f4f4;border-radius:8px;padding:1rem;cursor:pointer;" onclick="window.location.href='/app'">
+      <div style="font-weight:700;font-size:.9rem;">${d.destination}</div>
+      <div style="font-size:.78rem;color:#525252;margin-top:2px;">${d.region} · Best: ${d.best_months}</div>
+      <div style="font-size:.78rem;color:#198038;font-weight:600;margin-top:4px;">~$${d.avg_cost_usd}/day</div>
+      <div style="font-size:.72rem;margin-top:4px;color:${d.trend==='up'?'#198038':'#525252'}">${d.trend==='up'?'📈 Trending':'📊 Stable'}</div>
+    </div>`).join('');
+
+  // Show content
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('dashboard-content').style.display = 'block';
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+loadDashboard().catch(e => {
+  document.getElementById('loading').innerHTML = `<p style="color:#da1e28;">Failed to load dashboard. <a href="/app">Go to App</a></p>`;
+});
+</script>
+</body></html>

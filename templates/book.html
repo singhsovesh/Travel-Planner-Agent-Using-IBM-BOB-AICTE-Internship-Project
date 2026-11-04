@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Trip — {{ app_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #0f62fe; --blue-dark: #0043ce;
+      --teal: #009d9a; --green: #24a148; --red: #da1e28; --yellow: #f1c21b;
+      --dark: #161616; --dark-2: #262626; --dark-3: #393939;
+      --gray-10: #f4f4f4; --gray-20: #e0e0e0; --gray-60: #8d8d8d; --gray-70: #525252;
+      --white: #fff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'IBM Plex Sans', system-ui, sans-serif; background: var(--gray-10); color: var(--dark); line-height: 1.6; min-height: 100vh; }
+
+    /* ── NAV ── */
+    .nav { background: var(--dark); height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; font-weight: 700; font-size: 0.95rem; }
+    .nav-pill { background: var(--blue); color: white; font-size: 0.6rem; font-weight: 800; padding: 2px 7px; border-radius: 3px; letter-spacing: 0.07em; text-transform: uppercase; }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .nav-right a { color: #a8a8a8; text-decoration: none; font-size: 0.8rem; transition: color 0.15s; }
+    .nav-right a:hover { color: white; }
+    .nav-right .nav-app { background: var(--blue); color: white !important; padding: 0.35rem 0.9rem; border-radius: 4px; font-weight: 600; }
+    .nav-right .nav-app:hover { background: var(--blue-dark); }
+
+    /* ── PAGE HEADER ── */
+    .page-hero {
+      background: linear-gradient(135deg, var(--dark) 0%, #0d1f3c 100%);
+      padding: 3.5rem 2rem 3rem; text-align: center; color: white;
+      border-bottom: 1px solid var(--dark-3);
+    }
+    .page-hero-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .page-hero h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; }
+    .page-hero p { font-size: 0.95rem; color: #a8a8a8; max-width: 480px; margin: 0 auto; }
+    .no-ai-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(36,161,72,0.15); border: 1px solid rgba(36,161,72,0.35);
+      color: #42be65; padding: 4px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem;
+    }
+
+    /* ── LAYOUT ── */
+    .booking-layout { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── STEP INDICATOR ── */
+    .steps { display: flex; align-items: center; gap: 0; margin-bottom: 0.5rem; }
+    .step-item { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700; flex-shrink: 0; transition: all 0.3s; }
+    .step-circle.active { background: var(--blue); color: white; }
+    .step-circle.done { background: var(--green); color: white; }
+    .step-circle.inactive { background: var(--gray-20); color: var(--gray-60); }
+    .step-label { font-size: 0.78rem; font-weight: 600; color: var(--gray-70); white-space: nowrap; }
+    .step-line { height: 2px; flex: 1; background: var(--gray-20); margin: 0 8px; }
+    .step-line.done { background: var(--green); }
+    @media (max-width: 600px) { .step-label { display: none; } }
+
+    /* ── CARD ── */
+    .form-card { background: white; border-radius: 10px; border: 1px solid var(--gray-20); overflow: hidden; }
+    .form-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--gray-20); display: flex; align-items: center; gap: 10px; }
+    .form-card-header .icon { font-size: 1.3rem; }
+    .form-card-header h2 { font-size: 1rem; font-weight: 700; }
+    .form-card-header p { font-size: 0.82rem; color: var(--gray-70); margin-top: 2px; }
+    .form-card-body { padding: 1.5rem; }
+
+    /* ── FORM ELEMENTS ── */
+    .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; }
+    .fgrid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    @media (max-width: 600px) { .fgrid-2 { grid-template-columns: 1fr; } }
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg.full { grid-column: 1 / -1; }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--gray-70); text-transform: uppercase; letter-spacing: 0.04em; }
+    .req { color: var(--red); }
+    input, select, textarea {
+      border: 1px solid var(--gray-20); border-radius: 5px; padding: 0.6rem 0.8rem;
+      font-size: 0.875rem; font-family: inherit; background: white; color: var(--dark);
+      transition: border-color 0.15s, box-shadow 0.15s; width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(15,98,254,0.12); }
+    textarea { resize: vertical; min-height: 80px; }
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-size: 0.9rem; pointer-events: none; }
+    .input-icon-wrap input { padding-left: 2.2rem; }
+
+    /* ── TRAVELER ROW ── */
+    .traveler-list { display: flex; flex-direction: column; gap: 1rem; }
+    .traveler-row {
+      background: var(--gray-10); border-radius: 8px; padding: 1rem 1.25rem;
+      border: 1px solid var(--gray-20); position: relative;
+    }
+    .traveler-row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .traveler-row-title { font-size: 0.82rem; font-weight: 700; color: var(--gray-70); }
+    .btn-remove-traveler { background: none; border: none; color: var(--red); cursor: pointer; font-size: 0.8rem; font-weight: 600; padding: 2px 6px; border-radius: 3px; }
+    .btn-remove-traveler:hover { background: rgba(218,30,40,0.08); }
+
+    /* ── TOGGLE SECTIONS ── */
+    .section-toggle {
+      border: 1px solid var(--gray-20); border-radius: 8px; overflow: hidden;
+    }
+    .section-toggle-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem; cursor: pointer; background: var(--gray-10);
+      transition: background 0.15s;
+    }
+    .section-toggle-header:hover { background: var(--gray-20); }
+    .section-toggle-header h3 { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .toggle-chevron { transition: transform 0.25s; font-size: 0.75rem; color: var(--gray-60); }
+    .section-toggle.open .toggle-chevron { transform: rotate(180deg); }
+    .section-toggle-body { display: none; padding: 1.25rem; border-top: 1px solid var(--gray-20); }
+    .section-toggle.open .section-toggle-body { display: block; }
+
+    /* ── OPTIONAL BADGE ── */
+    .opt-badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-60); background: var(--gray-20); padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
+
+    /* ── PRICE SUMMARY ── */
+    .price-summary { background: linear-gradient(135deg, #0d1f3c, #0a1628); border-radius: 10px; padding: 1.5rem; color: white; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.875rem; }
+    .price-row:last-of-type { border-bottom: none; }
+    .price-row .label { color: #a8a8a8; }
+    .price-row .value { font-weight: 600; }
+    .price-total { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; margin-top: 0.5rem; border-top: 2px solid rgba(255,255,255,0.15); }
+    .price-total .label { font-size: 0.9rem; font-weight: 700; }
+    .price-total .value { font-size: 1.4rem; font-weight: 800; color: #74b1ff; }
+    .price-note { font-size: 0.75rem; color: #8d8d8d; margin-top: 0.75rem; }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 0.7rem 1.4rem; border-radius: 5px; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-primary:disabled { background: var(--gray-60); cursor: not-allowed; }
+    .btn-secondary { background: transparent; color: var(--blue); border: 1px solid var(--blue); }
+    .btn-secondary:hover { background: rgba(15,98,254,0.07); }
+    .btn-ghost { background: transparent; color: var(--gray-70); border: 1px solid var(--gray-20); }
+    .btn-ghost:hover { background: var(--gray-10); }
+    .btn-lg { padding: 0.9rem 2rem; font-size: 1rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── ALERT ── */
+    .alert { border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.875rem; display: flex; gap: 10px; align-items: flex-start; }
+    .alert-info { background: #edf5ff; color: #0043ce; border-left: 4px solid var(--blue); }
+    .alert-success { background: #defbe6; color: #0e6027; border-left: 4px solid var(--green); }
+    .alert-warning { background: #fff8e1; color: #6f4e00; border-left: 4px solid var(--yellow); }
+
+    /* ── CONFIRMATION ── */
+    #confirmation { display: none; text-align: center; padding: 3rem 2rem; }
+    #confirmation.visible { display: block; }
+    .confirm-check { font-size: 4rem; margin-bottom: 1rem; }
+    #confirmation h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+    #confirmation p { color: var(--gray-70); max-width: 480px; margin: 0 auto 1.5rem; }
+    .confirm-ref { font-family: 'IBM Plex Mono', monospace; background: var(--gray-10); border: 1px solid var(--gray-20); border-radius: 6px; padding: 0.75rem 1.5rem; display: inline-block; font-size: 1rem; font-weight: 600; color: var(--blue); margin-bottom: 2rem; }
+
+    /* ── FORM SECTION ── */
+    #booking-form-section { display: block; }
+    #booking-form-section.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 8.5V19.5L14 25L3 19.5V8.5L14 3Z" stroke="#74b1ff" stroke-width="1.5" fill="rgba(15,98,254,0.15)"/><path d="M7 13L14 10L21 13M14 10V21" stroke="#74b1ff" stroke-width="1.5" stroke-linecap="round"/></svg>
+    IBM Travel Planner
+    <span class="nav-pill">Granite AI</span>
+  </a>
+  <div class="nav-right">
+    <a href="/">← Home</a>
+    <a href="/app" class="nav-app">🤖 AI Agent</a>
+  </div>
+</nav>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-hero">
+  <div class="page-hero-icon">✈</div>
+  <div class="no-ai-badge">✓ No AI Required</div>
+  <h1>Book Your Trip Manually</h1>
+  <p>Complete control, no AI intervention. Fill in your travel details and get an instant booking confirmation.</p>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="booking-layout">
+
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-circle active" id="step-1-circle">1</div>
+      <span class="step-label">Trip Details</span>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-item">
+      <div class="step-circle inactive" id="step-2-circle">2</div>
+      <span class="step-label">Travelers</span>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-item">
+      <div class="step-circle inactive" id="step-3-circle">3</div>
+      <span class="step-label">Flights</span>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-item">
+      <div class="step-circle inactive" id="step-4-circle">4</div>
+      <span class="step-label">Hotel</span>
+    </div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-item">
+      <div class="step-circle inactive" id="step-5-circle">✓</div>
+      <span class="step-label">Confirm</span>
+    </div>
+  </div>
+
+  <!-- Form section -->
+  <div id="booking-form-section">
+
+    <!-- 1. Trip Overview -->
+    <div class="form-card" id="section-trip">
+      <div class="form-card-header">
+        <span class="icon">🗺</span>
+        <div>
+          <h2>Trip Overview</h2>
+          <p>Where are you going and when?</p>
+        </div>
+      </div>
+      <div class="form-card-body">
+        <div class="fgrid">
+          <div class="fg full">
+            <label>Trip Name <span class="req">*</span></label>
+            <input id="b-tripname" type="text" placeholder="e.g. Summer Europe Adventure 2026" />
+          </div>
+          <div class="fg">
+            <label>Departure City <span class="req">*</span></label>
+            <div class="input-icon-wrap">
+              <span class="icon">📍</span>
+              <input id="b-from" type="text" placeholder="e.g. Mumbai, Delhi" />
+            </div>
+          </div>
+          <div class="fg">
+            <label>Destination <span class="req">*</span></label>
+            <div class="input-icon-wrap">
+              <span class="icon">🌍</span>
+              <input id="b-destination" type="text" placeholder="e.g. Paris, France" />
+            </div>
+          </div>
+          <div class="fg">
+            <label>Departure Date <span class="req">*</span></label>
+            <input id="b-depart" type="date" />
+          </div>
+          <div class="fg">
+            <label>Return Date <span class="req">*</span></label>
+            <input id="b-return" type="date" />
+          </div>
+          <div class="fg">
+            <label>Trip Type</label>
+            <select id="b-triptype">
+              <option value="leisure">Leisure / Holiday</option>
+              <option value="business">Business Travel</option>
+              <option value="family">Family Trip</option>
+              <option value="honeymoon">Honeymoon</option>
+              <option value="adventure">Adventure / Backpacking</option>
+              <option value="group">Group Tour</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Budget (USD)</label>
+            <input id="b-budget" type="number" placeholder="e.g. 2500" min="0" />
+          </div>
+          <div class="fg full">
+            <label>Special Requirements</label>
+            <textarea id="b-notes" placeholder="e.g. wheelchair accessibility, dietary restrictions, infant seat, anniversary celebration…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Travelers -->
+    <div class="form-card" id="section-travelers">
+      <div class="form-card-header">
+        <span class="icon">👥</span>
+        <div>
+          <h2>Traveler Details</h2>
+          <p>Who's traveling? Add all passengers.</p>
+        </div>
+      </div>
+      <div class="form-card-body">
+        <div id="traveler-list" class="traveler-list"></div>
+        <div style="margin-top:1rem;">
+          <button class="btn btn-secondary" onclick="addTraveler()">+ Add Traveler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Flight Details (optional toggle) -->
+    <div class="section-toggle open" id="section-flight">
+      <div class="section-toggle-header" onclick="toggleSection('flight')">
+        <h3>✈ Flight Details <span class="opt-badge">Optional</span></h3>
+        <span class="toggle-chevron">▼</span>
+      </div>
+      <div class="section-toggle-body">
+        <div class="alert alert-info" style="margin-bottom:1rem;">
+          ℹ You can fill in your own flight details, or leave blank if not yet booked.
+        </div>
+        <div class="fgrid" style="margin-bottom:1.5rem;">
+          <div class="fg">
+            <label>Airline Preference</label>
+            <select id="b-airline-pref">
+              <option value="">No preference</option>
+              <option>Air India</option>
+              <option>IndiGo</option>
+              <option>Emirates</option>
+              <option>Qatar Airways</option>
+              <option>British Airways</option>
+              <option>Singapore Airlines</option>
+              <option>Lufthansa</option>
+              <option>Air France</option>
+              <option>American Airlines</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Cabin Class</label>
+            <select id="b-cabin">
+              <option value="economy">Economy</option>
+              <option value="premium_economy">Premium Economy</option>
+              <option value="business">Business Class</option>
+              <option value="first">First Class</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Outbound Flight No.</label>
+            <input id="b-flight-out" type="text" placeholder="e.g. AI302" />
+          </div>
+          <div class="fg">
+            <label>Return Flight No.</label>
+            <input id="b-flight-ret" type="text" placeholder="e.g. AI303" />
+          </div>
+          <div class="fg">
+            <label>Baggage Allowance</label>
+            <select id="b-baggage">
+              <option value="cabin_only">Cabin only (7 kg)</option>
+              <option value="15kg">15 kg checked</option>
+              <option value="20kg" selected>20 kg checked</option>
+              <option value="25kg">25 kg checked</option>
+              <option value="30kg">30 kg checked</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Seat Preference</label>
+            <select id="b-seat">
+              <option value="">No preference</option>
+              <option value="window">Window</option>
+              <option value="aisle">Aisle</option>
+              <option value="extra_legroom">Extra Legroom</option>
+              <option value="front">Front of Plane</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Meal Preference</label>
+            <select id="b-meal">
+              <option value="standard">Standard</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="halal">Halal</option>
+              <option value="kosher">Kosher</option>
+              <option value="gluten_free">Gluten Free</option>
+              <option value="child">Child Meal</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Stopovers</label>
+            <select id="b-stopover">
+              <option value="direct">Direct flights only</option>
+              <option value="max_1">Maximum 1 stopover</option>
+              <option value="any">Any — cheapest option</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg full">
+          <label>Frequent Flyer Numbers (optional)</label>
+          <input id="b-ffn" type="text" placeholder="e.g. AI: 123456789, EK: FF987654" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Hotel Details (optional toggle) -->
+    <div class="section-toggle open" id="section-hotel">
+      <div class="section-toggle-header" onclick="toggleSection('hotel')">
+        <h3>🏨 Hotel / Accommodation <span class="opt-badge">Optional</span></h3>
+        <span class="toggle-chevron">▼</span>
+      </div>
+      <div class="section-toggle-body">
+        <div class="fgrid">
+          <div class="fg">
+            <label>Hotel Name</label>
+            <input id="b-hotel-name" type="text" placeholder="e.g. Marriott Paris Opera" />
+          </div>
+          <div class="fg">
+            <label>Accommodation Type</label>
+            <select id="b-hotel-type">
+              <option value="hotel">Hotel</option>
+              <option value="boutique">Boutique Hotel</option>
+              <option value="resort">Resort</option>
+              <option value="hostel">Hostel</option>
+              <option value="airbnb">Airbnb / Apartment</option>
+              <option value="villa">Villa / Bungalow</option>
+              <option value="guesthouse">Guesthouse / B&B</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Star Rating</label>
+            <select id="b-hotel-stars">
+              <option value="">Any</option>
+              <option value="3">3 Star</option>
+              <option value="4" selected>4 Star</option>
+              <option value="5">5 Star</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Check-in</label>
+            <input id="b-checkin" type="date" />
+          </div>
+          <div class="fg">
+            <label>Check-out</label>
+            <input id="b-checkout" type="date" />
+          </div>
+          <div class="fg">
+            <label>Rooms Required</label>
+            <input id="b-rooms" type="number" value="1" min="1" max="10" />
+          </div>
+          <div class="fg">
+            <label>Room Type</label>
+            <select id="b-roomtype">
+              <option value="standard">Standard</option>
+              <option value="deluxe">Deluxe</option>
+              <option value="suite">Suite</option>
+              <option value="twin">Twin Bed</option>
+              <option value="double">Double Bed</option>
+              <option value="family">Family Room</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Board Basis</label>
+            <select id="b-board">
+              <option value="room_only">Room Only</option>
+              <option value="bb" selected>Bed & Breakfast</option>
+              <option value="half_board">Half Board</option>
+              <option value="full_board">Full Board</option>
+              <option value="all_inclusive">All Inclusive</option>
+            </select>
+          </div>
+          <div class="fg full">
+            <label>Hotel Preferences</label>
+            <input id="b-hotel-prefs" type="text" placeholder="e.g. swimming pool, gym, pet-friendly, central location, free WiFi" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Activities -->
+    <div class="section-toggle" id="section-activities">
+      <div class="section-toggle-header" onclick="toggleSection('activities')">
+        <h3>🎭 Activities & Tours <span class="opt-badge">Optional</span></h3>
+        <span class="toggle-chevron">▼</span>
+      </div>
+      <div class="section-toggle-body">
+        <div id="activities-list" class="traveler-list"></div>
+        <div style="margin-top:1rem;">
+          <button class="btn btn-secondary" onclick="addActivity()">+ Add Activity</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Transport at Destination -->
+    <div class="section-toggle" id="section-localtransport">
+      <div class="section-toggle-header" onclick="toggleSection('localtransport')">
+        <h3>🚗 Local Transport <span class="opt-badge">Optional</span></h3>
+        <span class="toggle-chevron">▼</span>
+      </div>
+      <div class="section-toggle-body">
+        <div class="fgrid">
+          <div class="fg">
+            <label>Transport Type</label>
+            <select id="b-local-type">
+              <option value="none">Not required</option>
+              <option value="rental_car">Rental Car</option>
+              <option value="taxi_app">Taxi / Ride App</option>
+              <option value="private_transfer">Private Transfer</option>
+              <option value="coach">Tour Coach</option>
+              <option value="public">Public Transport Pass</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Driver / Guide</label>
+            <select id="b-guide">
+              <option value="none">Not required</option>
+              <option value="guide_only">Local Guide</option>
+              <option value="driver_guide">Driver + Guide</option>
+              <option value="driver_only">Driver Only</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Airport Transfer</label>
+            <select id="b-transfer">
+              <option value="none">Not required</option>
+              <option value="arrival">Arrival only</option>
+              <option value="departure">Departure only</option>
+              <option value="both" selected>Both ways</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Travel Insurance -->
+    <div class="section-toggle" id="section-insurance">
+      <div class="section-toggle-header" onclick="toggleSection('insurance')">
+        <h3>🛡 Travel Insurance <span class="opt-badge">Optional</span></h3>
+        <span class="toggle-chevron">▼</span>
+      </div>
+      <div class="section-toggle-body">
+        <div class="fgrid">
+          <div class="fg">
+            <label>Insurance Type</label>
+            <select id="b-insurance">
+              <option value="none">No insurance</option>
+              <option value="basic">Basic (Medical + Cancellation)</option>
+              <option value="comprehensive" selected>Comprehensive</option>
+              <option value="adventure">Adventure Sports Cover</option>
+              <option value="existing">I have my own policy</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Policy Reference</label>
+            <input id="b-policy-ref" type="text" placeholder="If you have an existing policy" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Summary -->
+    <div class="price-summary">
+      <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:#a8a8a8;margin-bottom:1rem;font-weight:700;">Booking Summary</div>
+      <div class="price-row"><span class="label">Destination</span><span class="value" id="sum-destination">—</span></div>
+      <div class="price-row"><span class="label">Travel Dates</span><span class="value" id="sum-dates">—</span></div>
+      <div class="price-row"><span class="label">Travelers</span><span class="value" id="sum-travelers">1 person</span></div>
+      <div class="price-row"><span class="label">Accommodation</span><span class="value" id="sum-hotel">Not specified</span></div>
+      <div class="price-row"><span class="label">Estimated Budget</span><span class="value" id="sum-budget">—</span></div>
+      <p class="price-note">ℹ This is a manual booking record — no payment is processed. Use this reference to track your trip.</p>
+    </div>
+
+    <!-- Submit -->
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:flex-end; align-items:center;">
+      <a href="/" class="btn btn-ghost">← Back to Home</a>
+      <button class="btn btn-primary btn-lg" onclick="submitBooking()" id="submit-btn">
+        ✈ Confirm Booking
+      </button>
+    </div>
+
+  </div><!-- end booking-form-section -->
+
+  <!-- Confirmation -->
+  <div id="confirmation">
+    <div class="confirm-check">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <p>Your trip has been saved. Here's your booking reference number:</p>
+    <div class="confirm-ref" id="confirm-ref-number">TRV-XXXXXX</div>
+    <div id="confirm-summary" style="max-width:500px;margin:0 auto 2rem;text-align:left;"></div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="/app#bookings" class="btn btn-primary">📁 View All Bookings</a>
+      <button class="btn btn-secondary" onclick="printConfirmation()">🖨 Print Confirmation</button>
+      <a href="/" class="btn btn-ghost">← Home</a>
+    </div>
+  </div>
+
+</div><!-- end booking-layout -->
+
+<script>
+  // ── State ──
+  let travelerCount = 0;
+  let activityCount = 0;
+
+  // ── Traveler Management ──
+  function addTraveler() {
+    travelerCount++;
+    const list = document.getElementById('traveler-list');
+    const isFirst = travelerCount === 1;
+    const div = document.createElement('div');
+    div.className = 'traveler-row';
+    div.id = 'traveler-' + travelerCount;
+    div.innerHTML = `
+      <div class="traveler-row-header">
+        <span class="traveler-row-title">Traveler ${travelerCount}${isFirst ? ' (Lead Passenger)' : ''}</span>
+        ${!isFirst ? `<button class="btn-remove-traveler" onclick="removeTraveler(${travelerCount})">✕ Remove</button>` : ''}
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>First Name <span class="req">*</span></label><input id="t${travelerCount}-first" type="text" placeholder="First name" /></div>
+        <div class="fg"><label>Last Name <span class="req">*</span></label><input id="t${travelerCount}-last" type="text" placeholder="Last name" /></div>
+        <div class="fg"><label>Date of Birth</label><input id="t${travelerCount}-dob" type="date" /></div>
+        <div class="fg"><label>Nationality</label><input id="t${travelerCount}-nationality" type="text" placeholder="e.g. Indian, British" /></div>
+        <div class="fg"><label>Passport Number</label><input id="t${travelerCount}-passport" type="text" placeholder="e.g. A1234567" /></div>
+        <div class="fg"><label>Passport Expiry</label><input id="t${travelerCount}-passport-expiry" type="date" /></div>
+        <div class="fg"><label>Traveler Type</label>
+          <select id="t${travelerCount}-type">
+            <option value="adult">Adult (12+)</option>
+            <option value="child">Child (2–11)</option>
+            <option value="infant">Infant (under 2)</option>
+            <option value="senior">Senior (60+)</option>
+          </select>
+        </div>
+        ${isFirst ? `<div class="fg"><label>Email <span class="req">*</span></label><input id="t${travelerCount}-email" type="email" placeholder="lead@email.com" /></div>
+        <div class="fg"><label>Phone</label><input id="t${travelerCount}-phone" type="tel" placeholder="+91 98765 43210" /></div>` : ''}
+      </div>
+    `;
+    list.appendChild(div);
+    updateSummary();
+  }
+
+  function removeTraveler(n) {
+    const el = document.getElementById('traveler-' + n);
+    if (el) el.remove();
+    updateSummary();
+  }
+
+  // ── Activity Management ──
+  function addActivity() {
+    activityCount++;
+    const list = document.getElementById('activities-list');
+    const div = document.createElement('div');
+    div.className = 'traveler-row';
+    div.id = 'activity-' + activityCount;
+    div.innerHTML = `
+      <div class="traveler-row-header">
+        <span class="traveler-row-title">Activity ${activityCount}</span>
+        <button class="btn-remove-traveler" onclick="removeActivity(${activityCount})">✕ Remove</button>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Activity Name</label><input id="act${activityCount}-name" type="text" placeholder="e.g. Eiffel Tower Tour" /></div>
+        <div class="fg"><label>Date</label><input id="act${activityCount}-date" type="date" /></div>
+        <div class="fg"><label>Duration</label><input id="act${activityCount}-duration" type="text" placeholder="e.g. 3 hours, Full day" /></div>
+        <div class="fg"><label>Cost (USD)</label><input id="act${activityCount}-cost" type="number" placeholder="0" min="0" /></div>
+        <div class="fg full"><label>Notes</label><input id="act${activityCount}-notes" type="text" placeholder="e.g. Book in advance, meet at entrance gate" /></div>
+      </div>
+    `;
+    list.appendChild(div);
+  }
+
+  function removeActivity(n) {
+    const el = document.getElementById('activity-' + n);
+    if (el) el.remove();
+  }
+
+  // ── Section toggle ──
+  function toggleSection(id) {
+    const el = document.getElementById('section-' + id);
+    el.classList.toggle('open');
+  }
+
+  // ── Live summary update ──
+  function updateSummary() {
+    const dest = document.getElementById('b-destination').value || '—';
+    const depart = document.getElementById('b-depart').value;
+    const ret = document.getElementById('b-return').value;
+    const budget = document.getElementById('b-budget').value;
+    const hotelName = document.getElementById('b-hotel-name').value;
+    const rows = document.querySelectorAll('.traveler-row').length;
+
+    document.getElementById('sum-destination').textContent = dest;
+    document.getElementById('sum-dates').textContent = (depart && ret) ? `${depart} → ${ret}` : '—';
+    document.getElementById('sum-travelers').textContent = rows + (rows === 1 ? ' person' : ' people');
+    document.getElementById('sum-hotel').textContent = hotelName || 'Not specified';
+    document.getElementById('sum-budget').textContent = budget ? '$' + Number(budget).toLocaleString() : '—';
+  }
+
+  // Wire live updates
+  ['b-destination','b-depart','b-return','b-budget','b-hotel-name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateSummary);
+  });
+
+  // ── Validation ──
+  function validate() {
+    const required = [
+      { id: 'b-tripname', label: 'Trip Name' },
+      { id: 'b-from', label: 'Departure City' },
+      { id: 'b-destination', label: 'Destination' },
+      { id: 'b-depart', label: 'Departure Date' },
+      { id: 'b-return', label: 'Return Date' },
+    ];
+    for (const f of required) {
+      const el = document.getElementById(f.id);
+      if (!el || !el.value.trim()) {
+        alert(`Please fill in: ${f.label}`);
+        el && el.focus();
+        return false;
+      }
+    }
+    if (!document.getElementById('t1-first')) {
+      alert('Please add at least one traveler.');
+      return false;
+    }
+    if (!document.getElementById('t1-first').value.trim() || !document.getElementById('t1-last').value.trim()) {
+      alert('Please fill in the lead traveler\'s name.');
+      document.getElementById('t1-first').focus();
+      return false;
+    }
+    const depart = new Date(document.getElementById('b-depart').value);
+    const ret = new Date(document.getElementById('b-return').value);
+    if (ret <= depart) {
+      alert('Return date must be after departure date.');
+      return false;
+    }
+    return true;
+  }
+
+  // ── Submit ──
+  async function submitBooking() {
+    if (!validate()) return;
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Saving Booking…';
+
+    const firstName = document.getElementById('t1-first')?.value || '';
+    const lastName = document.getElementById('t1-last')?.value || '';
+    const email = document.getElementById('t1-email')?.value || '';
+    const phone = document.getElementById('t1-phone')?.value || '';
+
+    const payload = {
+      trip_name: document.getElementById('b-tripname').value.trim(),
+      destination: document.getElementById('b-destination').value.trim(),
+      start_date: document.getElementById('b-depart').value,
+      end_date: document.getElementById('b-return').value,
+      traveler_name: `${firstName} ${lastName}`.trim(),
+      booking_type: document.getElementById('b-triptype').value,
+      details: {
+        departure_from: document.getElementById('b-from').value,
+        budget_usd: document.getElementById('b-budget').value,
+        notes: document.getElementById('b-notes').value,
+        flight: {
+          airline_pref: document.getElementById('b-airline-pref').value,
+          cabin: document.getElementById('b-cabin').value,
+          flight_out: document.getElementById('b-flight-out').value,
+          flight_ret: document.getElementById('b-flight-ret').value,
+          baggage: document.getElementById('b-baggage').value,
+          seat: document.getElementById('b-seat').value,
+          meal: document.getElementById('b-meal').value,
+        },
+        hotel: {
+          name: document.getElementById('b-hotel-name').value,
+          type: document.getElementById('b-hotel-type').value,
+          stars: document.getElementById('b-hotel-stars').value,
+          checkin: document.getElementById('b-checkin').value,
+          checkout: document.getElementById('b-checkout').value,
+          rooms: document.getElementById('b-rooms').value,
+          room_type: document.getElementById('b-roomtype').value,
+          board: document.getElementById('b-board').value,
+          preferences: document.getElementById('b-hotel-prefs').value,
+        },
+        insurance: document.getElementById('b-insurance').value,
+        contact: { email, phone },
+        travelers_count: document.querySelectorAll('.traveler-row').length,
+      }
+    };
+
+    try {
+      const resp = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error('Server error ' + resp.status);
+      const data = await resp.json();
+
+      // Show confirmation
+      document.getElementById('booking-form-section').classList.add('hidden');
+      const conf = document.getElementById('confirmation');
+      conf.classList.add('visible');
+      conf.style.display = 'block';
+
+      const refNum = 'TRV-' + (data.booking_id || Date.now().toString().slice(-6)).toString().toUpperCase();
+      document.getElementById('confirm-ref-number').textContent = refNum;
+
+      const nights = Math.round((new Date(payload.end_date) - new Date(payload.start_date)) / 86400000);
+      document.getElementById('confirm-summary').innerHTML = `
+        <div style="background:var(--gray-10);border:1px solid var(--gray-20);border-radius:8px;padding:1.25rem;font-size:0.875rem;">
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--gray-20);"><span style="color:var(--gray-70)">Trip</span><strong>${payload.trip_name}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--gray-20);"><span style="color:var(--gray-70)">Destination</span><strong>${payload.destination}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--gray-20);"><span style="color:var(--gray-70)">Dates</span><strong>${payload.start_date} → ${payload.end_date} (${nights} nights)</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--gray-20);"><span style="color:var(--gray-70)">Lead Traveler</span><strong>${payload.traveler_name}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;"><span style="color:var(--gray-70)">Travelers</span><strong>${payload.details.travelers_count}</strong></div>
+        </div>
+      `;
+
+      // Update step indicators
+      ['1','2','3','4'].forEach(n => {
+        document.getElementById('step-' + n + '-circle').className = 'step-circle done';
+        document.getElementById('line-' + n)?.classList.add('done');
+      });
+      document.getElementById('step-5-circle').className = 'step-circle active';
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '✈ Confirm Booking';
+      alert('Failed to save booking: ' + err.message);
+    }
+  }
+
+  function printConfirmation() {
+    window.print();
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', () => {
+    addTraveler(); // Start with 1 traveler
+    // Set default dates
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const twoWeeks = new Date(nextMonth);
+    twoWeeks.setDate(twoWeeks.getDate() + 7);
+    document.getElementById('b-depart').value = nextMonth.toISOString().split('T')[0];
+    document.getElementById('b-return').value = twoWeeks.toISOString().split('T')[0];
+    document.getElementById('b-checkin').value = nextMonth.toISOString().split('T')[0];
+    document.getElementById('b-checkout').value = twoWeeks.toISOString().split('T')[0];
+    updateSummary();
+  });
+</script>
+</body>
+</html>
