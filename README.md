@@ -1,147 +1,325 @@
-# ✈ IBM Travel Planner Agent
+::: {align="center"}
+# ✈️ Travel Planner Agent
 
-An AI-powered Travel Planner Agent built with **IBM Granite** (via IBM watsonx.ai on IBM Cloud Lite) and Python/Flask.
+### Your AI-powered travel companion, built with IBM Granite
 
----
+**AICTE Edunet Foundation Project · Problem Statement No. 5**
 
-## 🚀 Features
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![IBM
+Granite](https://img.shields.io/badge/AI-IBM%20Granite-052FAD?logo=ibm&logoColor=white)](https://www.ibm.com/granite)
+[![IBM
+watsonx.ai](https://img.shields.io/badge/Platform-watsonx.ai-0F62FE?logo=ibm&logoColor=white)](https://www.ibm.com/products/watsonx-ai)
+[![Project](https://img.shields.io/badge/Project-AICTE%20Edunet-0A66C2)](https://github.com/singhsovesh/Travel-Planner-Agent-Using-IBM-BOB-AICTE-Internship-Project)
 
-| Feature | Description |
-|---|---|
-| 💬 **Chat Agent** | Conversational AI travel planning with session memory |
-| 🌍 **Destination Suggestions** | IBM Granite recommends 5 destinations matching your preferences |
-| 📖 **Place Explorer** | Detailed travel guides with local tips & hidden gems |
-| 📅 **Itinerary Builder** | Day-by-day plans with morning/afternoon/evening activities + meals |
-| 💰 **Budget Planner** | Detailed cost breakdowns per category |
-| 🌤 **Weather Forecast** | Real-time 14-day forecast via Open-Meteo (no API key needed) |
-| 🚀 **Transport Options** | Flight/train/bus comparisons with booking tips |
-| 🏨 **Accommodation** | Hotel/hostel/Airbnb recommendations by area |
-| 📋 **Visa Info** | Entry requirements, documents, health rules |
-| 🎒 **Packing Lists** | Climate + activity-specific packing lists |
-| 📁 **Booking Manager** | Create, track, and cancel travel bookings |
-| 🛡 **Travel Alerts** | Safety advisories, health warnings, emergency contacts |
+*Plan smarter. Travel better. Explore more.*
+:::
 
----
+------------------------------------------------------------------------
 
-## 🛠 Technology Stack
+## 📌 Project Overview
 
-- **AI/LLM**: IBM Granite (`ibm/granite-3-3-8b-instruct`) via [IBM watsonx.ai](https://www.ibm.com/watsonx) (IBM Cloud Lite)
-- **Backend**: Python 3.11+ / Flask 3.0
-- **Weather**: Open-Meteo API (free, no key required)
-- **Geocoding**: OpenStreetMap Nominatim (free)
-- **Frontend**: Vanilla HTML5/CSS3/JavaScript (IBM Carbon Design inspired)
+Travel planning often involves switching between multiple platforms to
+research destinations, compare transport and accommodation options,
+check weather conditions, estimate budgets, and organize an itinerary.
 
----
+**Travel Planner Agent** is an AI-powered travel assistant designed to
+bring these activities into one experience. It uses **IBM Granite
+through IBM watsonx.ai** to understand travel-related questions and help
+users explore destinations, create personalized trip plans, and get
+practical travel guidance.
 
-## ⚙ Setup
+The project was developed in response to **AICTE Edunet Foundation
+Problem Statement No. 5 -- Travel Planner Agent**, which focuses on
+using AI and real-time information to make trip planning more efficient
+and personalized.
 
-### 1. Prerequisites
+## 🎯 Problem Statement
 
-- Python 3.11+
-- IBM Cloud account (free Lite tier works)
-- IBM watsonx.ai project
+A Travel Planner Agent should help users plan trips efficiently and
+intelligently. It should understand preferences, budgets, and
+constraints; suggest destinations; build itineraries; and recommend
+transport and accommodation options. Integrations such as maps, weather
+updates, and local guides can make the experience more useful, while
+booking support and schedule optimization can help simplify travel
+management.
 
-### 2. IBM Cloud Setup
+**Mandatory technology requirement:** IBM Cloud Lite services / IBM
+Granite.
 
-1. Sign up at [cloud.ibm.com](https://cloud.ibm.com) (free Lite tier)
-2. Create a **Watson Machine Learning** service instance
-3. Create a **watsonx.ai** project at [dataplatform.cloud.ibm.com](https://dataplatform.cloud.ibm.com)
-4. Copy your **API Key** and **Project ID**
+## ✨ Key Features
 
-### 3. Configure .env
+The application is designed around the following travel-planning
+capabilities:
 
-Open `.env` and fill in your credentials:
+-   **AI travel chat** -- Ask travel-related questions using the IBM
+    Granite-powered assistant.
+-   **Personalized trip planning** -- Get help shaping an itinerary
+    around destination preferences, trip duration, and budget.
+-   **Destination discovery** -- Explore places to visit and get
+    destination suggestions.
+-   **Itinerary assistance** -- Organize travel ideas into a day-by-day
+    plan.
+-   **Transport guidance** -- Explore transport options for a trip.
+-   **Accommodation guidance** -- Get help considering hotel and stay
+    options.
+-   **Weather information** -- Access weather-related travel guidance
+    when the relevant API is configured.
+-   **Budget estimation** -- Plan and compare travel costs.
+-   **Currency assistance** -- Get help with travel currency questions.
+-   **Visa and entry guidance** -- Find general visa and entry
+    information to research before travelling.
+-   **Packing suggestions** -- Get destination- and trip-related packing
+    advice.
+-   **Booking workflow** -- Access the application's booking and
+    reservation-management features.
 
-```env
-IBM_WATSONX_API_KEY=your_actual_api_key
-IBM_WATSONX_PROJECT_ID=your_actual_project_id
-IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
-IBM_GRANITE_MODEL_ID=ibm/granite-3-3-8b-instruct
+> Availability of live information depends on the relevant API
+> credentials, service access, and configuration. AI-generated travel,
+> visa, and safety information should be independently verified before
+> making bookings or travel decisions.
+
+## 🖥️ Application Preview
+
+### Home page
+
+The landing page introduces the travel assistant, highlights its
+capabilities, and provides entry points for AI-assisted planning and
+manual booking.
+
+![Travel Planner Agent home
+page](docs/images/travel-planner-homepage.png)
+
+### AI travel chat
+
+The chat interface lets users ask travel questions and receive responses
+from the IBM Granite-powered assistant. The interface also displays
+API/service status and suggested questions.
+
+![Travel Planner Agent AI chat
+interface](docs/images/travel-ai-chat.png)
+
+## 🧠 AI Integration
+
+The project integrates **IBM Granite** using **IBM watsonx.ai**.
+
+At a high level, the interaction flow is:
+
+1.  A user enters a travel question or planning request in the
+    application.
+2.  The Flask application receives the request through its backend
+    route.
+3.  The relevant agent/service prepares the request for the language
+    model.
+4.  IBM Granite is called through the watsonx.ai service using
+    configured credentials.
+5.  The generated response is returned to the application and displayed
+    in the chat interface.
+
+The application can also use configured external services for supporting
+travel information, such as weather and maps/place data.
+
+## 🧰 Technology Stack
+
+  Area             Technology
+  ---------------- ----------------------------------------------
+  Backend          Python, Flask
+  AI model         IBM Granite
+  AI platform      IBM watsonx.ai
+  Cloud platform   IBM Cloud Lite
+  Frontend         HTML, CSS, JavaScript
+  UI rendering     Jinja2 templates
+  Weather data     OpenWeatherMap API (when configured)
+  Maps / places    Google Maps Platform API (when configured)
+  Dependencies     Python packages listed in `requirements.txt`
+
+## 🗂️ Project Structure
+
+``` text
+Travel-Planner-Agent/
+│
+├── app.py
+├── agents.py
+├── chat_agent.py
+├── granite_client.py
+├── config.py
+│
+├── auth.py
+├── models.py
+├── booking_service.py
+├── itinerary_service.py
+├── destination_service.py
+├── transport_accommodation_service.py
+├── weather_service.py
+├── currency_service.py
+├── analytics_service.py
+├── pdf_service.py
+├── templates_service.py
+│
+├── templates/
+│   ├── home.html
+│   ├── index.html
+│   ├── dashboard.html
+│   ├── chat.html
+│   ├── login.html
+│   ├── register.html
+│   └── ...
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── icons/
+│
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
-### 4. Install Dependencies
+*The structure above summarizes the main application modules and
+folders; filenames may vary with the current project version.*
 
-```bash
+## ⚙️ Getting Started
+
+### 1. Clone the repository
+
+``` bash
+git clone https://github.com/singhsovesh/Travel-Planner-Agent-Using-IBM-BOB-AICTE-Internship-Project.git
+cd Travel-Planner-Agent-Using-IBM-BOB-AICTE-Internship-Project
+```
+
+### 2. Create and activate a virtual environment
+
+**Windows PowerShell:**
+
+``` powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux:**
+
+``` bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+
+``` bash
 pip install -r requirements.txt
 ```
 
-### 5. Run the Application
+### 4. Configure environment variables
 
-```bash
+Create a local `.env` file by copying the example:
+
+**Windows PowerShell:**
+
+``` powershell
+Copy-Item .env.example .env
+```
+
+**macOS / Linux:**
+
+``` bash
+cp .env.example .env
+```
+
+Open `.env` and add your own credentials. Use the exact variable names
+expected by the application and its configuration module.
+
+Typical IBM watsonx.ai settings include:
+
+``` env
+IBM_API_KEY=your_ibm_cloud_api_key
+IBM_CLOUD_URL=your_ibm_cloud_endpoint
+WATSONX_PROJECT_ID=your_watsonx_project_id
+WATSONX_URL=your_watsonx_endpoint
+GRANITE_MODEL_ID=your_granite_model_id
+```
+
+Add optional third-party API keys only if you intend to use those
+integrations, for example:
+
+``` env
+OPENWEATHER_API_KEY=your_openweathermap_api_key
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+**Never commit `.env` or real credentials to GitHub.** The repository's
+`.gitignore` should exclude `.env` files. Keep `.env.example` limited to
+variable names and placeholder values.
+
+### 5. Run the application
+
+Use the entry point and run command defined by the project. For the
+Flask application, the usual command is:
+
+``` bash
 python app.py
 ```
 
-Open your browser at: **http://localhost:5000**
+Then open the local address printed in the terminal (commonly
+`http://127.0.0.1:5000`) in your browser.
 
----
+> If the application uses a different startup command or port in your
+> current version, follow the configuration in `app.py` and `README`/run
+> instructions supplied with that version.
 
-## 📁 Project Structure
+## 🔐 Security Notes
 
-```
-Travel Agent AICTE/
-├── .env                              # IBM Cloud credentials (configure this)
-├── app.py                            # Flask REST API — all endpoints
-├── config.py                         # Configuration loader
-├── granite_client.py                 # IBM Granite LLM client (watsonx.ai)
-├── chat_agent.py                     # Conversational AI agent
-├── destination_service.py            # Destination suggestions & guides
-├── itinerary_service.py              # Day-by-day itinerary builder
-├── weather_service.py                # Open-Meteo weather integration
-├── transport_accommodation_service.py# Transport & accommodation
-├── booking_service.py                # Booking management & schedule optimizer
-├── requirements.txt                  # Python dependencies
-├── templates/
-│   └── index.html                    # Main frontend (Jinja2 template)
-└── static/
-    ├── css/style.css                 # IBM Carbon-inspired styles
-    └── js/app.js                     # Frontend JavaScript
-```
+-   Keep API keys, IBM Cloud credentials, project IDs where treated as
+    secrets, database credentials, and Flask secret keys out of source
+    control.
+-   Do not upload screenshots that show `.env` values, access tokens,
+    private endpoints, or account details.
+-   If a credential has been exposed, revoke or rotate it in the
+    provider dashboard and update your local `.env`.
+-   Use `.env.example` only for placeholder values.
 
----
+## 🚀 Future Enhancements
 
-## 🔌 REST API Reference
+Potential improvements include:
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/chat` | Chat with the AI travel agent |
-| POST | `/api/chat/reset` | Reset conversation history |
-| POST | `/api/destinations/suggest` | Suggest destinations |
-| POST | `/api/destinations/describe` | Get destination guide |
-| POST | `/api/destinations/local-tips` | Get local insider tips |
-| POST | `/api/weather` | Get weather forecast |
-| POST | `/api/itinerary/build` | Build full itinerary |
-| POST | `/api/itinerary/optimize` | Optimize existing itinerary |
-| POST | `/api/itinerary/budget` | Estimate travel budget |
-| POST | `/api/transport` | Get transport options |
-| POST | `/api/accommodation` | Get accommodation recommendations |
-| POST | `/api/visa` | Get visa requirements |
-| POST | `/api/packing-list` | Generate packing list |
-| POST | `/api/alerts` | Get travel safety alerts |
-| GET  | `/api/bookings` | List all bookings |
-| POST | `/api/bookings` | Create a booking |
-| GET  | `/api/bookings/<id>` | Get a booking |
-| PUT  | `/api/bookings/<id>` | Update a booking |
-| POST | `/api/bookings/<id>/cancel` | Cancel a booking |
-| POST | `/api/bookings/<id>/alerts` | Add alert to booking |
-| GET  | `/api/health` | Health & credentials status |
+-   Interactive map-based itinerary visualization.
+-   More detailed live transport and accommodation comparisons.
+-   Booking-provider integrations and booking-status notifications.
+-   Calendar export and schedule optimization.
+-   User preference profiles and saved trips.
+-   More robust validation and source links for visa, safety, and local
+    travel guidance.
+-   Automated tests and deployment configuration.
 
----
+## 🎓 Project Information
 
-## 💡 Example Chat Queries
+  ----------------------------------------------------------------------------------------------------------------------------------------
+  Detail                              Information
+  ----------------------------------- ----------------------------------------------------------------------------------------------------
+  Project title                       Travel Planner Agent
 
-- *"Plan a 10-day trip to Japan in April with a moderate budget"*
-- *"I want a beach holiday under $100/day, departing from London"*
-- *"What's the weather like in Bali in August?"*
-- *"What visa do I need as an Indian passport holder for Japan?"*
-- *"Build a packing list for a winter trip to Iceland with hiking"*
-- *"Suggest transport options from Paris to Amsterdam"*
+  Problem statement                   No. 5 -- Travel Planner Agent
 
----
+  Program                             AICTE Edunet Foundation Project
 
-## 📝 Notes
+  Mandatory technology                IBM Cloud Lite services / IBM Granite
 
-- The `.env` file contains sensitive credentials — never commit it to version control
-- Weather data is real-time from Open-Meteo (free, no account needed)
-- AI responses (destinations, itineraries, etc.) use IBM Granite via IBM Cloud Lite
-- Bookings are stored in-memory; restart resets them (production use: add a database)
-- Visa/safety info is AI-generated — always verify with official government sources
+  AI platform                         IBM watsonx.ai
+
+  Repository                          [GitHub -- Travel Planner
+                                      Agent](https://github.com/singhsovesh/Travel-Planner-Agent-Using-IBM-BOB-AICTE-Internship-Project)
+  ----------------------------------------------------------------------------------------------------------------------------------------
+
+## 👨‍💻 Author
+
+**Sovesh Singh**
+
+-   GitHub: [@singhsovesh](https://github.com/singhsovesh)
+-   Project repository: [Travel Planner
+    Agent](https://github.com/singhsovesh/Travel-Planner-Agent-Using-IBM-BOB-AICTE-Internship-Project)
+
+------------------------------------------------------------------------
+
+::: {align="center"}
+**Built with Python and IBM Granite · AICTE Edunet Foundation Project**
+:::
