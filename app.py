@@ -727,7 +727,7 @@ def pwa_manifest():
 @app.route("/service-worker.js")
 def service_worker():
     sw_content = """
-const CACHE_NAME = 'ibm-travel-v2';
+const CACHE_NAME = 'ibm-travel-v3';
 const STATIC_ASSETS = ['/', '/app', '/book', '/static/css/style.css', '/static/js/app.js'];
 
 self.addEventListener('install', e => {
