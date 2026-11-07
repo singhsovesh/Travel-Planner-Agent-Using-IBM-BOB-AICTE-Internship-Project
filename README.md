@@ -1,4 +1,4 @@
-::: {align="center"}
+
 # ✈️ Travel Planner Agent
 
 ### Your AI-powered travel companion, built with IBM Granite
